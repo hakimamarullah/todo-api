@@ -11,12 +11,14 @@ app.use(middlewares)
 //ROUTES
 app.use("/api/todo", router)
 
-app.get("/", (req,res)=>{
-	res.status(200).json({success:true, msg:"api is online"})
+
+//HOME
+app.get("/", (req, res) => {
+    res.status(200).json({ success: true, msg: "api is online" })
 })
 
 
 //START SERVER
-app.listen(port, ()=>{
-	console.log(`Server is listening on port:${port}`);
+app.listen(port, () => {
+    console.log(`Server is listening on port:${port}`);
 })
