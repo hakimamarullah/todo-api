@@ -16,7 +16,7 @@ const pool = new Pool({
 });
 
 
-const db = async (query, ...params)=>{
+const db = async (query,...params)=>{
 	const client = await pool.connect();
 	const data = await client.query(query,params);
 	client.release();

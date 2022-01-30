@@ -5,6 +5,11 @@ const prettify = (object) => {
     return JSON.stringify(object, null, 4)
 }
 
+const validateRowsResult = (object)=>{
+    if(object.rows.length === 0)
+        throw new Error("Entry Not Found");
+}
+
 const getAllTodo = async (req, res) => {
     try {
         const data = await db(`SELECT id,content, to_char(due_date, 'YYYY-MM-DD HH24:MI:SS') as due_date,
@@ -13,7 +18,6 @@ const getAllTodo = async (req, res) => {
             to_char(completed_at, 'YYYY-MM-DD HH24:MI:SS') as completed_at,
             complete
             FROM TODOS ORDER BY due_date ASC`);
-        console.log(data)
         res.header("Content-Type", "application/json")
         res.status(200).send(prettify({ ok: true, data: data.rows }))
     } catch (err) {
@@ -31,6 +35,9 @@ const getTodo = async (req, res) => {
             to_char(updated_at, 'YYYY-MM-DD HH24:MI:SS') as updated_at,
             to_char(completed_at, 'YYYY-MM-DD HH24:MI:SS') as completed_at,
             complete FROM TODOS WHERE id=$1`, req.params.id);
+
+        validateRowsResult(data);
+
         res.header("Content-Type", "application/json");
         res.status(200).send(prettify({ ok: true, data: data.rows }))
 
@@ -41,7 +48,7 @@ const getTodo = async (req, res) => {
 
 const updateTodo = async (req, res) => {
     try {
-        let { content = undefined, due_date = undefined, complete = undefined } = req.body;
+        let { content = '', due_date = '', complete = undefined } = req.body;
         const { rows } = await db(`SELECT
             id,content,
             to_char(due_date, 'YYYY-MM-DD HH24:MI:SS') as due_date,
@@ -50,6 +57,7 @@ const updateTodo = async (req, res) => {
             to_char(completed_at, 'YYYY-MM-DD HH24:MI:SS') as completed_at,
             complete FROM TODOS WHERE id=$1`, req.params.id);
 
+        validateRowsResult({rows: rows});
         content = content === '' ? rows[0].content : content;
         due_date = due_date === '' ? rows[0].due_date : due_date;
         complete = complete === undefined ? rows[0].complete : complete;
@@ -82,9 +90,7 @@ const deleteTodo = async (req, res) => {
             to_char(completed_at, 'YYYY-MM-DD HH24:MI:SS') as completed_at,
             complete`);
 
-        if (deleted.rows.length === 0) {
-            throw new Error(`No entry with id: ${req.params.id}`);
-        }
+        validateRowsResult(deleted);
 
         res.header("Content-Type", "application/json")
         res.status(200).send(prettify({ ok: true, data: deleted }))
@@ -99,9 +105,9 @@ const createTodo = async (req, res) => {
     try {
         const { content, due_date } = req.body;
         if (!content || !due_date) {
-            throw new Error("Content and due_date can't be empty");
+            throw new Error("Conten and due_date can't be empty");
         }
-        const { command, rowCount, rows } = await db("INSERT INTO todos (content, due_date) VALUES($1,$2) RETURNING content",
+        const { command, rowCount, rows } = await db("INSERT INTO todos (content, due_date) VALUES($1,$2) RETURNING id, content",
             content, due_date)
         res.status(201).json({ success: true, msg: "successfully added new to do", result: { command, rowCount, rows } })
     } catch (err) {
