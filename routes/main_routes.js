@@ -9,12 +9,12 @@ const {
 
 router.get("/", getAllTodo);
 
-// router.get("/:id", getTodo);
+router.get("/:id", getTodo);
 
-// router.put("/:id", updateTodo);
+router.put("/:id", updateTodo);
 
-// router.post("/", createTodo);
+router.post("/", createTodo);
 
-// router.delete("/:id", deleteTodo);
+router.delete("/:id", deleteTodo);
 
 module.exports = router;
