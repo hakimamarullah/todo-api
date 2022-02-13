@@ -1,14 +1,16 @@
 const express = require("express")
 const app = express()
 const router = require("./routes/main_routes")
+const authRouter = require("./routes/authRouter")
 const middlewares = require("./middlewares/middlewares")
-let port = process.env.PORT || 8000
+const {PORT} = require("./config.env")
 
 //MIDDLEWARE
 app.use(middlewares)
 
 //ROUTES
 app.use("/api/todo", router)
+app.use("/api/user", authRouter)
 
 
 //ERROR HANDLER BODY-PARSER
@@ -25,6 +27,6 @@ app.get("/", (req, res) => {
 
 
 //START SERVER
-app.listen(port, () => {
-    console.log(`Server is listening on port:${port}`);
+app.listen(PORT, () => {
+    console.log(`Server is listening on port:${PORT}`);
 })
